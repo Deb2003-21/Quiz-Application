@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scorecard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f9f1ee;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+        }
+        .card {
+            padding: 40px;
+            border-radius: 15px;
+            background-color: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            color: #333;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+        }
+        .btn-custom {
+            background-color: #d19c95;
+            border: none;
+            color: white;
+            margin: 10px 0;
+            width: 100%;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        .btn-custom:hover {
+            transform: scale(1.05);
+            background-color: #c28a83;
+        }
+        h2 {
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .underline {
+            width: 60px;
+            height: 4px;
+            background: #d19c95;
+            margin: 10px auto 20px;
+            border-radius: 5px;
+        }
+        .score-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .score-table th, .score-table td {
+            padding: 12px;
+            border: 1px solid #d19c95;
+            border-radius: 5px;
+        }
+        .score-table th {
+            background-color: #d19c95;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Scorecard</h2>
+    <div class="underline"></div>
+    <table class="table score-table">
+        <thead>
+            <tr>
+                <th>Player ID</th>
+                <th>Accuracy</th>
+                <th>Time Taken</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td th:text="${session.player}"></td>
+                <td id="acc"></td>
+                <td id="tm"></td>
+            </tr>
+            
+        </tbody>
+    </table>
+    <a href="/create" class="btn btn-custom" >New Quiz</a>
+</div>
+
+<script>
+	const params = new URLSearchParams(window.location.search);
+	var score=params.get('score');
+	var total=params.get('total');
+	const time=params.get('time');
+	const acc= (score/total)*100;
+	const diff=((total/4)*60)-time;
+	document.getElementById('acc').innerText=acc.toFixed(2)+" %";
+	document.getElementById('tm').innerText=diff+" sec";
+</script>
+
+</body>
+</html>

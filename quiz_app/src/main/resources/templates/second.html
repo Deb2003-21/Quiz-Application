@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Question</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f9f1ee;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .progress-bar {
+            background-color: #d19c95;
+        }
+        .score {
+            font-size: 24px;
+            color: #d19c95;
+        }
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border: 1px solid #d19c95;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #f3d7d3;
+        }
+        .option span {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #d19c95;
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+        }
+        .btn-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .prev-btn, .next-btn {
+            padding: 10px 20px;
+            background-color: #d19c95;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .s-btn {
+            padding: 10px 20px;
+            background-color: blue;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .s-btn:hover {
+            background-color: #111184;
+        }
+        .prev-btn:hover, .next-btn:hover {
+            background-color: #b58d7a;
+        }
+        button:disabled {
+            background-color: #d1c6b7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            Question <span id="question-number">1</span> / <span id="total-questions">0</span>
+        </div>
+        <div>
+            Time Left: <span id="timer"></span> sec
+        </div>
+    </div>
+    <div class="progress mb-4">
+        <div class="progress-bar" role="progressbar" id="pbar"></div>
+    </div>
+    <h4 id="question-text">Question will appear here</h4>
+    <input type="text" id="id" style="display:none;">
+    <div class="option" id="1" onclick="add('TRUE',0)">
+        <span>A</span>True
+    </div>
+    <div class="option" id="2" onclick="add('FALSE',1)">
+        <span>B</span>False
+    </div>
+    
+    <div class="btn-container">
+        <button class="prev-btn" id="prev-btn" onclick="changeQuestion(-1)" disabled>Previous</button>
+        <button class="next-btn" id="next-btn" onclick="changeQuestion(1)">Next</button>
+        <button class="s-btn" id="s-btn" onclick="add('',2)">Submit</button>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var questions = [[${data}]];
+    var mid=[[${mid}]];
+    // Get the data from Thymeleaf
+    var currentIndex = 0;  // Start from the first question
+    var totalQuestions = questions.length;
+
+    // Update the total number of questions
+    document.getElementById('total-questions').textContent = totalQuestions;
+
+    // Function to change question based on direction (1 for next, -1 for previous)
+    function changeQuestion(direction) {
+        currentIndex += direction;
+        var progress = ((currentIndex + 1) / totalQuestions) * 100;
+        document.getElementById('id').value="";
+        document.getElementById('id').value = questions[currentIndex].id;
+        
+        // Update the question number display
+        document.getElementById('question-number').textContent = currentIndex + 1;
+        
+        // Display the current question
+        document.getElementById('question-text').innerHTML = questions[currentIndex].question;
+        
+        // Update the progress bar width
+        document.getElementById('pbar').style.width = progress + "%";
+        
+        // Enable/disable buttons based on the current index
+        document.getElementById('prev-btn').disabled = currentIndex === 0;
+        
+        if (currentIndex === totalQuestions - 1) {
+            document.getElementById('next-btn').style.display = "none";
+            document.getElementById('s-btn').style.display = "block";
+        } else {
+            document.getElementById('next-btn').style.display = "block";
+            document.getElementById('s-btn').style.display = "none";
+        }
+
+        // Reset option colors on question change
+         const id = document.getElementById('id').value;
+        
+        const index = list.findIndex(item => item.id === id);
+        if (index !== -1){
+        if( list[index].response=='TRUE')
+        {
+        	 document.getElementById('1').style.backgroundColor = "#b58d7a";
+             document.getElementById('2').style.backgroundColor = "";
+        }
+        else
+        	{
+        	document.getElementById('1').style.backgroundColor = "";
+            document.getElementById('2').style.backgroundColor = "#b58d7a";
+        	}
+        }
+        else
+        {
+        	resetOptions()
+        }
+    }
+
+    var list = [];
+    function add(response, c) {
+        const id = document.getElementById('id').value;
+
+        if (c !== 2) {
+            const index = list.findIndex(item => item.id === id);
+            if (index !== -1) {
+                // If the item exists, update its response
+                list[index].response = response;
+            } else {
+                // If the item doesn't exist, add a new object
+                list.push({ id, response });
+            }
+
+           
+            // Change background color based on selected option
+            if (c == 0) {
+                document.getElementById('1').style.backgroundColor = "#b58d7a";
+                document.getElementById('2').style.backgroundColor = "";
+            } else {
+                document.getElementById('1').style.backgroundColor = "";
+                document.getElementById('2').style.backgroundColor = "#b58d7a";
+            }
+        } else {
+            // Submit the responses
+            fetch('http://localhost:8091/quiz/submit/'+mid, {
+                method: 'POST', // HTTP method
+                headers: {
+                    'Content-Type': 'application/json' // Send JSON data
+                },
+                body: JSON.stringify(list) // Convert the data to JSON
+            })
+            .then(response => response.json()) // Parse the response JSON
+            .then(result => {
+                console.log('Success:', result);
+                if (result >= 0) {
+                    window.location.href = '/third?score='+result+'&total='+[[${data.size()}]]+'&time='+timeLeft; // Replace with your target URL
+                } else {
+                    console.log('Submission failed .');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error); // Handle any errors
+            });
+            
+           
+        }
+    }
+
+    // Reset option colors to default (white) when moving to next question
+    function resetOptions() {
+        document.getElementById('1').style.backgroundColor = "";
+        document.getElementById('2').style.backgroundColor = "";
+    }
+
+    // Initialize the first question
+    changeQuestion(0); // Display the first question when the page loads
+    /*]]>*/
+    
+     let timeLeft =  (questions.length/4)*60; // Set timer duration in seconds
+    const timerDisplay = document.getElementById('timer');
+
+    const countdown = setInterval(() => {
+        timeLeft--;
+        timerDisplay.innerText = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+             add('',2);// Replace with the desired timeout URL
+        }
+    }, 1000);
+    
+</script>
+
+</body>
+</html>
